@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng Cơ điện - Vận tải | Vui cùng WorldCup 2026</title>
+    <style>
+        :root { --primary-color: #0d5c3a; --secondary-color: #f4a261; --bg-color: #f4f6f8; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: var(--bg-color); color: #333; }
+        header { background: var(--primary-color); color: white; padding: 15px 20px; font-size: 22px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: #e74c3c; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .container { display: flex; max-width: 1300px; margin: 20px auto; padding: 0 15px; gap: 20px; flex-wrap: wrap; }
+        .main-content { flex: 2; min-width: 350px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .sidebar { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* Trận đấu */
+        .match-group { margin-bottom: 25px; text-align: left; }
+        .group-title { background: #e8f5e9; color: var(--primary-color); padding: 6px 12px; font-weight: bold; border-left: 4px solid var(--primary-color); margin-bottom: 10px; border-radius: 0 4px 4px 0; }
+        .match-card { border: 1px solid #e0e0e0; padding: 12px; margin-bottom: 10px; border-radius: 6px; background: #fff; transition: 0.2s; position: relative; }
+        .match-card:hover { border-color: #bbb; }
+        .match-meta { font-size: 12px; color: #777; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .match-teams { display: flex; justify-content: space-around; align-items: center; font-size: 16px; font-weight: bold; margin: 10px 0; }
+        .vs { color: #aaa; font-size: 13px; font-weight: normal; }
+        .vote-options { display: flex; justify-content: space-around; background: #f9f9f9; padding: 8px; border-radius: 4px; font-size: 14px; }
+        .vote-options label { cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .locked { background: #f5f5f5; color: #999; }
+        .locked-tag { position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+        
+        /* Bảng xếp hạng */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { border: 1px solid #e0e0e0; padding: 10px 6px; text-align: center; }
+        th { background-color: var(--primary-color); color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        
+        /* Login */
+        .login-container { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        .login-logo { font-size: 24px; font-weight: bold; color: var(--primary-color); margin-bottom: 5px; }
+        .login-sub { font-size: 18px; color: #555; margin-bottom: 25px; font-weight: 500; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 11px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button.btn-main { width: 100%; padding: 11px; background: var(--primary-color); color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button.btn-main:hover { background: #0a462c; }
+        
+        /* Admin */
+        .admin-zone { background: #fff3cd; border: 1px solid #ffeeba; padding: 8px; margin-top: 8px; border-radius: 4px; font-size: 13px; }
+        .admin-zone input { width: 40px; text-align: center; padding: 2px; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen" class="login-container">
+    <div class="login-logo">Phòng Cơ điện - Vận tải</div>
+    <div class="login-sub">⚽ Vui cùng WorldCup 2026 ⚽</div>
+    <input type="text" id="username" placeholder="Tên đăng nhập (Thử gõ: user1 hoặc admin)">
+    <input type="password" id="password" placeholder="Mật khẩu (Mặc định: 123)">
+    <button class="btn-main" onclick="handleLogin()">Đăng nhập</button>
+    <p><a href="#" onclick="handleForgotPassword()" style="color: var(--primary-color); font-size: 13px; text-decoration: none;">Quên hoặc Đổi mật khẩu?</a></p>
+</div>
+
+<div id="main-screen" style="display: none;">
+    <header>
+        <div>Phòng Cơ điện - Vận tải - Vui cùng WorldCup 2026</div>
+        <div>
+            <span id="user-display" style="font-size: 16px; margin-right: 15px;"></span>
+            <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <h2 style="margin-top:0; color: var(--primary-color);">Danh Sách Trận Đấu Vòng Bảng</h2>
+            <div id="matches-container"></div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="card">
+                <h3 style="margin-top:0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 5px;">Thống Kê Bình Chọn Của Bạn</h3>
+                <div style="font-size: 14px; line-height: 1.6; text-align: left;" id="personal-stats">
+                    </div>
+            </div>
+            
+            <div class="card">
+                <h3 style="margin-top:0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 5px;">Bảng Tổng Hợp Bình Chọn</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Họ và Tên</th>
+                            <th>Đã chọn</th>
+                            <th>Sai</th>
+                            <th>K thua</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // DỮ LIỆU 72 TRẬN ĐẤU DO BẠN CUNG CẤP
+    const matches = [
+        ["M001","12/06/2026","02:00","Mexico 🇲🇽","Nam Phi 🇿🇦","A","Vòng bảng - Sân Azteca","",""],
+        ["M002","12/06/2026","09:00","Hàn Quốc 🇰🇷","CH Séc 🇨🇿","A","Vòng bảng - Sân Akron","",""],
+        ["M013","16/06/2026","05:00","Mexico 🇲🇽","Hàn Quốc 🇰🇷","A","Vòng bảng - Sân Azteca","",""],
+        ["M014","16/06/2026","11:00","Nam Phi 🇿🇦","CH Séc 🇨🇿","A","Vòng bảng - Sân Akron","",""],
+        ["M025","20/06/2026","02:00","CH Séc 🇨🇿","Mexico 🇲🇽","A","Vòng bảng - Sân Monterrey","",""],
+        ["M026","20/06/2026","02:00","Nam Phi 🇿🇦","Hàn Quốc 🇰🇷","A","Vòng bảng - Sân Azteca","",""],
+        ["M003","13/06/2026","02:00","Canada 🇨🇦","Bosnia 🇧🇦","B","Vòng bảng - Sân BMO Field","",""],
+        ["M005","14/06/2026","02:00","Qatar 🇶🇦","Thụy Sĩ 🇨🇭","B","Vòng bảng - Sân Levi's","",""],
+        ["M015","17/06/2026","02:00","Canada 🇨🇦","Qatar 🇶🇦","B","Vòng bảng - Sân BC Place","",""],
+        ["M016","17/06/2026","08:00","Bosnia 🇧🇦","Thụy Sĩ 🇨🇭","B","Vòng bảng - Sân BMO Field","",""],
+        ["M027","21/06/2026","05:00","Thụy Sĩ 🇨🇭","Canada 🇨🇦","B","Vòng bảng - Sân BC Place","",""],
+        ["M028","21/06/2026","05:00","Bosnia 🇧🇦","Qatar 🇶🇦","B","Vòng bảng - Sân Lumen Field","",""],
+        ["M006","14/06/2026","05:00","Brazil 🇧🇷","Ma-rốc 🇲🇦","C","Vòng bảng - Sân MetLife","",""],
+        ["M007","14/06/2026","08:00","Haiti 🇭🇹","Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿","C","Vòng bảng - Sân Gillette","",""],
+        ["M017","18/06/2026","02:00","Brazil 🇧🇷","Haiti 🇭🇹","C","Vòng bảng - Sân Lincoln Financial","",""],
+        ["M018","18/06/2026","05:00","Ma-rốc 🇲🇦","Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿","C","Vòng bảng - Sân MetLife","",""],
+        ["M029","22/06/2026","08:00","Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿","Brazil 🇧🇷","C","Vòng bảng - Sân Gillette","",""],
+        ["M030","22/06/2026","08:00","Ma-rốc 🇲🇦","Haiti 🇭🇹","C","Vòng bảng - Sân MetLife","",""],
+        ["M004","13/06/2026","08:00","Mỹ 🇺🇸","Paraguay 🇵🇾","D","Vòng bảng - Sân SoFi","",""],
+        ["M008","14/06/2026","11:00","Úc 🇦🇺","Thổ Nhĩ Kỳ 🇹🇷","D","Vòng bảng - Sân BC Place","",""],
+        ["M019","18/06/2026","08:00","Mỹ 🇺🇸","Úc 🇦🇺","D","Vòng bảng - Sân Lumen Field","",""],
+        ["M020","18/06/2026","11:00","Paraguay 🇵🇾","Thổ Nhĩ Kỳ 🇹🇷","D","Vòng bảng - Sân SoFi","",""],
+        ["M031","22/06/2026","11:00","Thổ Nhĩ Kỳ 🇹🇷","Mỹ 🇺🇸","D","Vòng bảng - Sân SoFi","",""],
+        ["M032","22/06/2026","11:00","Paraguay 🇵🇾","Úc 🇦🇺","D","Vòng bảng - Sân Levi's","",""],
+        ["M009","15/06/2026","00:00","Đức 🇩🇪","Curaçao 🇨🇼","E","Vòng bảng - Sân NRG","",""],
+        ["M011","15/06/2026","06:00","Bờ Biển Ngà 🇨🇮","Ecuador 🇪🇨","E","Vòng bảng - Sân Lincoln Field","",""],
+        ["M021","19/06/2026","00:00","Đức 🇩🇪","Bờ Biển Ngà 🇨🇮","E","Vòng bảng - Sân Mercedes-Benz","",""],
+        ["M022","19/06/2026","03:00","Curaçao 🇨🇼","Ecuador 🇪🇨","E","Vòng bảng - Sân NRG","",""],
+        ["M033","23/06/2026","02:00","Ecuador 🇪🇨","Đức 🇩🇪","E","Vòng bảng - Sân NRG","",""],
+        ["M034","23/06/2026","02:00","Curaçao 🇨🇼","Bờ Biển Ngà 🇨🇮","E","Vòng bảng - Sân Hard Rock","",""],
+        ["M010","15/06/2026","03:00","Hà Lan 🇳🇱","Nhật Bản 🇯🇵","F","Vòng bảng - Sân AT&T","",""],
+        ["M012","15/06/2026","09:00","Thụy Điển 🇸🇪","Tunisia 🇹🇳","F","Vòng bảng - Sân BBVA","",""],
+        ["M023","19/06/2026","06:00","Hà Lan 🇳🇱","Thụy Điển 🇸🇪","F","Vòng bảng - Sân Arrowhead","",""],
+        ["M024","19/06/2026","09:00","Nhật Bản 🇯🇵","Tunisia 🇹🇳","F","Vòng bảng - Sân AT&T","",""],
+        ["M035","23/06/2026","05:00","Tunisia 🇹🇳","Hà Lan 🇳🇱","F","Vòng bảng - Sân AT&T","",""],
+        ["M036","23/06/2026","05:00","Nhật Bản 🇯🇵","Thụy Điển 🇸🇪","F","Vòng bảng - Sân Toyota","",""],
+        ["M037","15/06/2026","23:00","Tây Ban Nha 🇪🇸","Cape Verde 🇨🇻","G","Vòng bảng - Mercedes-Benz","",""],
+        ["M038","16/06/2026","02:00","Bỉ 🇧🇪","Ai Cập 🇪🇬","G","Vòng bảng - Sân Lumen Field","",""],
+        ["M039","16/06/2026","08:00","Iran 🇮🇷","New Zealand 🇳🇿","G","Vòng bảng - Sân SoFi","",""],
+        ["M040","20/06/2026","05:00","Bỉ 🇧🇪","Iran 🇮🇷","G","Vòng bảng - Sân Arrowhead","",""],
+        ["M041","20/06/2026","08:00","Ai Cập 🇪🇬","New Zealand 🇳🇿","G","Vòng bảng - Sân Lumen Field","",""],
+        ["M042","24/06/2026","02:00","New Zealand 🇳🇿","Bỉ 🇧🇪","G","Vòng bảng - Sân BC Place","",""],
+        ["M043","24/06/2026","02:00","Ai Cập 🇪🇬","Iran 🇮🇷","G","Vòng bảng - Sân Lumen Field","",""],
+        ["M044","16/06/2026","05:00","Ả Rập Xê Út 🇸🇦","Uruguay 🇺🇾","H","Vòng bảng - Sân Hard Rock","",""],
+        ["M045","20/06/2026","11:00","Tây Ban Nha 🇪🇸","Ả Rập Xê Út 🇸🇦","H","Vòng bảng - Sân Hard Rock","",""],
+        ["M046","21/06/2026","00:00","Cape Verde 🇨🇻","Uruguay 🇺🇾","H","Vòng bảng - Sân NRG","",""],
+        ["M047","24/06/2026","05:00","Uruguay 🇺🇾","Tây Ban Nha 🇪🇸","H","Vòng bảng - Sân Hard Rock","",""],
+        ["M048","24/06/2026","05:00","Cape Verde 🇨🇻","Ả Rập Xê Út 🇸🇦","H","Vòng bảng - Sân Mercedes-Benz","",""],
+        ["M049","17/06/2026","02:00","Pháp 🇫🇷","Senegal 🇸🇳","I","Vòng bảng - Sân MetLife","",""],
+        ["M050","17/06/2026","05:00","Iraq 🇮🇶","Na Uy 🇳🇴","I","Vòng bảng - Sân Gillette","",""],
+        ["M051","21/06/2026","02:00","Pháp 🇫🇷","Iraq 🇮🇶","I","Vòng bảng - Sân Gillette","",""],
+        ["M052","21/06/2026","08:00","Senegal 🇸🇳","Na Uy 🇳🇴","I","Vòng bảng - Sân Lincoln Field","",""],
+        ["M053","25/06/2026","02:00","Na Uy 🇳🇴","Pháp 🇫🇷","I","Vòng bảng - Sân MetLife","",""],
+        ["M054","25/06/2026","02:00","Senegal 🇸🇳","Iraq 🇮🇶","I","Vòng bảng - Sân Gillette","",""],
+        ["M055","17/06/2026","08:00","Argentina 🇦🇷","Algeria 🇩🇿","J","Vòng bảng - Sân Arrowhead","",""],
+        ["M056","17/06/2026","11:00","Áo 🇦🇹","Jordan 🇯🇴","J","Vòng bảng - Sân Levi's","",""],
+        ["M057","21/06/2026","11:00","Argentina 🇦🇷","Áo 🇦🇹","J","Vòng bảng - Sân SoFi","",""],
+        ["M058","22/06/2026","00:00","Algeria 🇩🇿","Jordan 🇯🇴","J","Vòng bảng - Sân AT&T","",""],
+        ["M059","25/06/2026","05:00","Jordan 🇯🇴","Argentina 🇦🇷","J","Vòng bảng - Sân Arrowhead","",""],
+        ["M060","25/06/2026","05:00","Algeria 🇩🇿","Áo 🇦🇹","J","Vòng bảng - Sân Levi's","",""],
+        ["M061","18/06/2026","00:00","Bồ Đào Nha 🇵🇹","CHDC Congo 🇨🇩","K","Vòng bảng - Mercedes-Benz","",""],
+        ["M062","18/06/2026","09:00","Uzbekistan 🇺🇿","Colombia 🇨🇴","K","Vòng bảng - Sân Azteca","",""],
+        ["M063","22/06/2026","02:00","Bồ Đào Nha 🇵🇹","Uzbekistan 🇺🇿","K","Vòng bảng - Sân Monterrey","",""],
+        ["M064","22/06/2026","05:00","CHDC Congo 🇨🇩","Colombia 🇨🇴","K","Vòng bảng - Sân Akron","",""],
+        ["M065","26/06/2026","02:00","Colombia 🇨🇴","Bồ Đào Nha 🇵🇹","K","Vòng bảng - Sân Azteca","",""],
+        ["M066","26/06/2026","02:00","CHDC Congo 🇨🇩","Uzbekistan 🇺🇿","K","Vòng bảng - Sân Monterrey","",""],
+        ["M067","18/06/2026","03:00","Anh 🏴󠁧󠁢󠁥󠁮󠁧󠁿","Croatia 🇭🇷","L","Vòng bảng - Sân AT&T","",""],
+        ["M068","18/06/2026","06:00","Ghana 🇬🇭","Panama 🇵🇦","L","Vòng bảng - Sân Gillette","",""],
+        ["M069","22/06/2026","08:00","Anh 🏴󠁧󠁢󠁥󠁮󠁧󠁿","Ghana 🇬🇭","L","Vòng bảng - Sân Lincoln Field","",""],
+        ["M070","22/06/2026","11:00","Croatia 🇭🇷","Panama 🇵🇦","L","Vòng bảng - Sân Levi's","",""],
+        ["M071","26/06/2026","05:00","Panama 🇵🇦","Anh 🏴󠁧󠁢󠁥󠁮󠁧󠁿","L","Vòng bảng - Sân AT&T","",""],
+        ["M072","26/06/2026","05:00","Croatia 🇭🇷","Ghana 🇬🇭","L","Vòng bảng - Sân NRG","",""]
+    ];
+
+    // DỮ LIỆU ĐỂ KIỂM THỬ GIAO DIỆN (LƯU LOCAL)
+    let currentUser = null;
+    let userVotes = JSON.parse(localStorage.getItem('wc_votes')) || {}; // { username: { matchId: choice } }
+    let adminResults = JSON.parse(localStorage.getItem('wc_admin_results')) || {}; // { matchId: { result: "thang/hoa/thua", score: "1-0" } }
+
+    const mockUsers = {
+        "admin": { name: "Quản trị viên (Admin)", isAdmin: true },
+        "user1": { name: "Nguyễn Văn Tuấn", isAdmin: false },
+        "user2": { name: "Trần Văn Hải", isAdmin: false },
+        "user3": { name: "Phạm Minh Hoàng", isAdmin: false }
+    };
+
+    function handleLogin() {
+        const u = document.getElementById('username').value.trim().toLowerCase();
+        const p = document.getElementById('password').value;
+
+        if (mockUsers[u] && p === "123") {
+            currentUser = { username: u, ...mockUsers[u] };
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-screen').style.display = 'block';
+            document.getElementById('user-display').innerText = `Xin chào, ${currentUser.name}`;
+            
+            if(!userVotes[u]) userVotes[u] = {};
+            
+            renderMatches();
+            renderSidebar();
+        } else {
+            alert("Tên đăng nhập hoặc mật khẩu sai! (Gợi ý: Dùng user1 hoặc admin, mật khẩu: 123)");
+        }
+    }
+
+    function handleLogout() {
+        currentUser = null;
+        document.getElementById('main-screen').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'block';
+    }
+
+    function handleForgotPassword() {
+        const action = prompt("Nhập '1' nếu muốn đổi mật khẩu.\nNhập '2' nếu quên mật khẩu:");
+        if (action === "1") {
+            alert("Vui lòng nhập mật khẩu cũ và mới. Tính năng đổi mật khẩu sẽ đồng bộ lên Google Sheets khi bạn cấu hình xong.");
+        } else if (action === "2") {
+            alert("Hệ thống: Vui lòng liên hệ Trưởng phòng hoặc Admin phòng Cơ điện - Vận tải để được cấp lại mật khẩu!");
+        }
+    }
+
+    // KIỂM TRA TỰ ĐỘNG KHÓA SAU 15 GIỜ BÓNG LĂN
+    function isMatchLocked(dateStr, timeStr) {
+        const [day, month, year] = dateStr.split('/');
+        const [hour, minute] = timeStr.split(':');
+        
+        // Thời gian bóng lăn (kickoff)
+        const kickoffTime = new Date(year, month - 1, day, hour, minute);
+        
+        // Thời gian khóa = Giờ bóng lăn + 15 tiếng
+        const lockTime = new Date(kickoffTime.getTime() + (15 * 60 * 60 * 1000));
+        
+        const now = new Date();
+        return now > lockTime;
+    }
+
+    // HIỂN THỊ TRẬN ĐẤU
+    function renderMatches() {
+        const container = document.getElementById('matches-container');
+        container.innerHTML = "";
+        
+        let currentGroup = "";
+        let groupDiv = null;
+
+        matches.forEach(m => {
+            const [id, date, time, teamA, teamB, group, stadium] = m;
+            const isLocked = isMatchLocked(date, time);
+            
+            // Nếu đổi bảng thì tạo tiêu đề bảng mới
+            if (group !== currentGroup) {
+                currentGroup = group;
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'match-group';
+                groupDiv.innerHTML = `<div class="group-title">BẢNG ${group}</div>`;
+                container.appendChild(groupDiv);
+            }
+
+            const card = document.createElement('div');
+            card.className = `match-card ${isLocked ? 'locked' : ''}`;
+            
+            // Lấy lựa chọn cũ của user nếu có
+            const savedChoice = userVotes[currentUser.username]?.[id] || "";
+            // Lấy kết quả của Admin nếu có
+            const adminRes = adminResults[id]?.result || "";
+            const adminScore = adminResults[id]?.score || "";
+
+            let html = `
+                <div class="match-meta">
+                    <span>Mã: ${id} | 📅 ${date} - ⏰ ${time}</span>
+                    <span>🏟️ ${stadium}</span>
+                </div>
+                ${isLocked ? '<span class="locked-tag">Hết giờ sửa</span>' : ''}
+                <div class="match-teams">
+                    <div>${teamA}</div>
+                    <div class="vs">VS</div>
+                    <div>${teamB}</div>
+                </div>
+            `;
+
+            // Phần bình chọn cho User thông thường
+            html += `
+                <div class="vote-options">
+                    <label><input type="radio" name="vote-${id}" value="thang" ${savedChoice==='thang'?'checked':''} ${isLocked?'disabled':''} onchange="saveVote('${id}', 'thang')"> Đội A thắng</label>
+                    <label><input type="radio" name="vote-${id}" value="hoa" ${savedChoice==='hoa'?'checked':''} ${isLocked?'disabled':''} onchange="saveVote('${id}', 'hoa')"> Hòa</label>
+                    <label><input type="radio" name="vote-${id}" value="thua" ${savedChoice==='thua'?'checked':''} ${isLocked?'disabled':''} onchange="saveVote('${id}', 'thua')"> Đội A thua</label>
+                </div>
+            `;
+
+            // Nếu kết quả trận đấu đã được Admin cập nhật thì hiển thị cho user thấy công khai
+            if (adminRes) {
+                let textRes = adminRes === 'thang' ? 'Đội A Thắng' : (adminRes === 'hoa' ? 'Hòa' : 'Đội A Thua');
+                html += `<div style="margin-top:6px; font-size:13px; color:#27ae60; font-weight:bold;">Tỷ số thực tế: ${adminScore} (${textRes})</div>`;
+            }
+
+            // GIAO DIỆN DÀNH RIÊNG CHO TÀI KHOẢN ADMIN
+            if (currentUser.isAdmin) {
+                html += `
+                    <div class="admin-zone">
+                        <strong>Khu vực Admin:</strong> Tỷ số: <input type="text" id="score-${id}" value="${adminScore}" placeholder="0-0"> | Kết quả chính thức: 
+                        <select id="res-${id}" onchange="saveAdminResult('${id}')">
+                            <option value="">-- Chọn KQ --</option>
+                            <option value="thang" ${adminRes==='thang'?'selected':''}>Đội A Thắng</option>
+                            <option value="hoa" ${adminRes==='hoa'?'selected':''}>Hòa</option>
+                            <option value="thua" ${adminRes==='thua'?'selected':''}>Đội A Thua</option>
+                        </select>
+                        <button onclick="saveAdminResult('${id}')" style="font-size:11px; cursor:pointer;">Lưu</button>
+                    </div>
+                `;
+            }
+
+            card.innerHTML = html;
+            groupDiv.appendChild(card);
+        });
+    }
+
+    // XỬ LÝ LƯU BÌNH CHỌN CHO USER
+    function saveVote(matchId, choice) {
+        if(!userVotes[currentUser.username]) userVotes[currentUser.username] = {};
+        userVotes[currentUser.username][matchId] = choice;
+        localStorage.setItem('wc_votes', JSON.stringify(userVotes));
+        renderSidebar();
+    }
+
+    // XỬ LÝ LƯU KẾT QUẢ CHO ADMIN
+    function saveAdminResult(matchId) {
+        const scoreInput = document.getElementById(`score-${matchId}`).value;
+        const resSelect = document.getElementById(`res-${matchId}`).value;
+        
+        adminResults[matchId] = { score: scoreInput, result: resSelect };
+        localStorage.setItem('wc_admin_results', JSON.stringify(adminResults));
+        renderSidebar();
+        renderMatches(); // vẽ lại để cập nhật hiển thị kết quả ra ngoài
+    }
+
+    // TÍNH TOÁN VÀ HIỂN THỊ SIDEBAR
+    function renderSidebar() {
+        // 1. Thống kê cá nhân của người đang đăng nhập
+        const pStatsDiv = document.getElementById('personal-stats');
+        const votes = userVotes[currentUser.username] || {};
+        let count = 0, win = 0, hoa = 0, thua = 0;
+        
+        Object.keys(votes).forEach(id => {
+            count++;
+            if (votes[id] === 'thang') win++;
+            if (votes[id] === 'hoa') hoa++;
+            if (votes[id] === 'thua') thua++;
+        });
+
+        pStatsDiv.innerHTML = `
+            • Tổng số trận đã bình chọn: <strong>${count} / 72</strong> trận.<br>
+            • Dự đoán Thắng: <strong>${win}</strong> trận.<br>
+            • Dự đoán Hòa: <strong>${hoa}</strong> trận.<br>
+            • Dự đoán Thua: <strong>${thua}</strong> trận.
+        `;
+
+        // 2. Bảng xếp hạng chung của tất cả User
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = "";
+        
+        let stt = 1;
+        Object.keys(mockUsers).forEach(username => {
+            if(mockUsers[username].isAdmin) return; // Ẩn tài khoản admin khỏi bảng xếp hạng tiền bạc công khai
+
+            let totalVoted = Object.keys(userVotes[username] || {}).length;
+            let wrongCount = 0;
+
+            // Đếm số trận sai dựa trên kết quả Admin nhập
+            Object.keys(adminResults).forEach(mId => {
+                const officialRes = adminResults[mId].result;
+                const userChoice = userVotes[username]?.[mId];
+                if (officialRes && userChoice && userChoice !== officialRes) {
+                    wrongCount++;
+                }
+            });
+
+            let kThua = wrongCount * 10; // Tính số k thua (1 trận = 10k)
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${stt++}</td>
+                <td style="text-align:left; font-weight:500;">${mockUsers[username].name}</td>
+                <td>${totalVoted}/72</td>
+                <td style="color:#e74c3c; font-weight:bold;">${wrongCount}</td>
+                <td style="color:#c0392b; font-weight:bold; background:#fff0f0;">${kThua}k</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+</script>
+</body>
+</html>
